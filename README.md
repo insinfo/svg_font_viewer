@@ -1,2 +1,2 @@
 # svg_font_viewer
-SVG Font Viewer 
+Web tool for SVG Font Viewer 
