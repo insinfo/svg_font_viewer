@@ -1,178 +1,207 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>
-svg_font_viewer
-</title>
-  <style>
-    body {
-    background-color: #5588FF;
-    color: rgba(255, 255, 255, .8);
-}
-a {
-    color: inherit;
-}
-dl, dt, dd {
-    margin:0;
-}
-dl {
-    float: left;
-    outline: rgba(255, 255, 255, .8) dotted 1px;
-    width: 6em;
-    height: 5em;
-    margin-top: .5em;
-    margin-right: .5em;
-    padding: .5em;
-}
-dd {
-    overflow: hidden;
-    max-height: 100%;
-    max-width: 100%;
-}
-.char {
-    display: block;
-    margin: 0 auto;
-    width:2em;
-    height:2em;
-    padding:.5em;
-}
-.char svg {
-    height:2em;
-}
-.char-code {
-    display: none;
-}
-.show-code .char-code {
-    display: block;
-}
-.char-name {
-    display: block;
-}
-.show-code .char-name {
-    display: none;
-}
-.char:link {
-    text-decoration: none;
-}
-  </style>
-  <script>
-    var doc = document.documentElement;
-var toload = 0;
-var loaded = 0;
-var target = document.body;
-
-var createSVG = function (charsvg, ex, em) {
-    var svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    var pathEl = document.createElementNS("http://www.w3.org/2000/svg", "path");
-
-    pathEl.setAttribute('d', charsvg);
-    pathEl.setAttribute('transform', 'translate(0,' + em + ') scale(1, -1)')
-    pathEl.style.fill = 'currentColor';
-
-    svgEl.setAttribute('viewBox', '0 0 ' + (ex*1+256) + ' ' + (em*1+256)); //FIXME
-    svgEl.appendChild(pathEl);
-
-    return svgEl;
-}
-
-doc.ondragover = function () {
-    //this.className = 'hover';
-    return false;
-};
-doc.ondragend = function () {
-    //this.className = '';
-    return false;
-};
-doc.ondrop = function (event) {
-    event.preventDefault && event.preventDefault();
-    this.className = '';
-
-    // now do something with:
-    var files = event.dataTransfer.files;
-
-    toload = files.length;
-    loaded = 0;
-    target.innerHTML = '';
-
-    p = document.createElement('p');
-
-    a = document.createElement('a');
-    a.href = "javascript:document.body.setAttribute('class',document.body.getAttribute('class')==='show-code'?'':'show-code');";
-    a.innerText = "[code]";
-    p.appendChild(a);
-
-    target.appendChild(p);
-
-
-    for (var x = 0; x < files.length; x++) {
-        var file = files[x];
-        console.log('Font loading:', file.size, file.name, file.type);
-        /*
-	If the file is a font and the web browser supports FileReader,
-	append css @font-face rule to the page; Change page`s font
-*/
-
-
-        if (typeof FileReader !== "undefined" && (/svg/i).test(file.type)) {
-            reader = new FileReader();
-            reader.type = file.type;
-            reader.onload = (function () {
-                return function (evt) {
-                    var txt = evt.target.result;
-                    if (window.DOMParser) {
-                        parser = new DOMParser();
-                        xmlDoc = parser.parseFromString(txt, "text/xml");
-                    } else // Internet Explorer
-                    {
-                        xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
-                        xmlDoc.async = false;
-                        xmlDoc.loadXML(txt);
-                    }
-                    var glyphs = xmlDoc.getElementsByTagName('glyph');
-                    var src = '';
-                    fontFamily = xmlDoc.getElementsByTagName('font-face')[0].getAttribute('font-family') || xmlDoc.getElementsByTagName('font')[0].id;
-
-                    var g = document.createElement("h2");
-                    g.innerText = fontFamily;
-                    target.appendChild(g);
-
-                    var ff = xmlDoc.getElementsByTagName('font-face')[0];
-                    var em = ff.getAttribute('units-per-em');
-                    var g = document.createElement("pre");
-                    g.innerText = "1em = " + em + "\nfont-weight:" + ff.getAttribute('font-weight') + "\n";
-                    target.appendChild(g);
-
-                    src = '';
-                    for (var n = 0; n < glyphs.length; n++) {
-                        var glyph = glyphs[n];
-                        if (glyph) {
-                            var char = glyph.getAttribute('unicode');
-                            var unicode = char ? (char.charCodeAt(0).toString(16)) : null;
-                            var charname = glyph.getAttribute('glyph-name');
-                            var charsvg = glyph.getAttribute('d');
-                            var ex = glyph.getAttribute('horiz-adv-x') || em;
-                            src = '<dt id="' + unicode + '" class="glyph"><a href="#' + unicode + '" class="char" id="svg-' + unicode + '"></a></dt>';
-                            src += '<dd class="char-code">' + unicode + '</dd>';
-                            src += '<dd class="char-name">' + charname + '</dd>';
-                            var g = document.createElement("dl");
-                            g.innerHTML = src;
-                            target.appendChild(g);
-                            if (charsvg) {
-                                document.getElementById('svg-' + unicode).appendChild(createSVG(charsvg, ex, em));
-                            }
-                        }
-                    }
-                };
-            }());
-            reader.readAsText(file);
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>
+        SVG Font Viewer
+    </title>
+    <style>
+        body {
+            background-color: #0f2455;
+            color: rgba(255, 255, 255, .8);
         }
 
-    }
-    return false;
-};
-   </script>
+        a {
+            color: inherit;
+        }
+
+        dl,
+        dt,
+        dd {
+            margin: 0;
+        }
+
+        dl {
+            float: left;
+            outline: rgba(255, 255, 255, .8) dotted 1px;
+            width: 6em;
+            height: 5em;
+            margin-top: .5em;
+            margin-right: .5em;
+            padding: .5em;
+        }
+
+        dd {
+            overflow: hidden;
+            max-height: 100%;
+            max-width: 100%;
+        }
+
+        .char {
+            background: #0f2455;
+            display: block;
+            margin: 0 auto;
+            width: 2.5em;
+            height: 2.5em;
+            padding: .5em;
+            transition: transform .2s; /* Animation */
+        }
+
+        .char svg {
+            height: 3.0em;
+            
+        }
+
+        .char:hover {
+            transform: scale(3); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+        }
+
+        .char-code {
+            display: none;
+        }
+
+        .show-code .char-code {
+            display: block;
+        }
+
+        .char-name {
+            display: block;
+        }
+
+        .show-code .char-name {
+            display: none;
+        }
+
+        .char:link {
+            text-decoration: none;
+        }
+    </style>
+    <script>
+       window.onload = function(e){
+        var doc = document.documentElement;
+        var toload = 0;
+        var loaded = 0;
+        var target = document.body;
+
+        var createSVG = function (charsvg, ex, em) {
+            var svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            var pathEl = document.createElementNS("http://www.w3.org/2000/svg", "path");
+
+            pathEl.setAttribute('d', charsvg);
+            pathEl.setAttribute('transform', 'translate(0,' + em + ') scale(1, -1)')
+            pathEl.style.fill = 'currentColor';
+
+            svgEl.setAttribute('viewBox', '0 0 ' + (ex * 1 + 256) + ' ' + (em * 1 + 256)); //FIXME
+            svgEl.appendChild(pathEl);
+
+            return svgEl;
+        }
+
+        doc.ondragover = function () {
+            //this.className = 'hover';
+            return false;
+        };
+        doc.ondragend = function () {
+            //this.className = '';
+            return false;
+        };
+        doc.ondrop = function (event) {
+            event.preventDefault && event.preventDefault();
+            this.className = '';
+
+            // now do something with:
+            var files = event.dataTransfer.files;
+
+            toload = files.length;
+            loaded = 0;
+            target.innerHTML = '';
+
+            p = document.createElement('p');
+
+            a = document.createElement('a');
+            a.href = "javascript:document.body.setAttribute('class',document.body.getAttribute('class')==='show-code'?'':'show-code');";
+            a.innerText = "[code]";
+            p.appendChild(a);
+
+            target.appendChild(p);
+
+
+            for (var x = 0; x < files.length; x++) {
+                var file = files[x];
+                console.log('Font loading:', file.size, file.name, file.type);
+                /*
+            If the file is a font and the web browser supports FileReader,
+            append css @font-face rule to the page; Change page`s font
+        */
+
+
+                if (typeof FileReader !== "undefined" && (/svg/i).test(file.type)) {
+                    reader = new FileReader();
+                    reader.type = file.type;
+                    reader.onload = (function () {
+                        return function (evt) {
+                            var txt = evt.target.result;
+                            if (window.DOMParser) {
+                                parser = new DOMParser();
+                                xmlDoc = parser.parseFromString(txt, "text/xml");
+                            } else // Internet Explorer
+                            {
+                                xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+                                xmlDoc.async = false;
+                                xmlDoc.loadXML(txt);
+                            }
+                            var glyphs = xmlDoc.getElementsByTagName('glyph');
+                            var src = '';
+                            fontFamily = xmlDoc.getElementsByTagName('font-face')[0].getAttribute('font-family') || xmlDoc.getElementsByTagName('font')[0].id;
+
+                            var g = document.createElement("h2");
+                            g.innerText = fontFamily;
+                            target.appendChild(g);
+
+                            var ff = xmlDoc.getElementsByTagName('font-face')[0];
+                            var em = ff.getAttribute('units-per-em');
+                            var g = document.createElement("pre");
+                            g.innerText = "1em = " + em + "\nfont-weight:" + ff.getAttribute('font-weight') + "\n";
+                            target.appendChild(g);
+
+                            src = '';
+                            for (var n = 0; n < glyphs.length; n++) {
+                                var glyph = glyphs[n];
+                                if (glyph) {
+                                    var char = glyph.getAttribute('unicode');
+                                    var unicode = char ? (char.charCodeAt(0).toString(16)) : null;
+                                    var charname = glyph.getAttribute('glyph-name');
+                                    var charsvg = glyph.getAttribute('d');
+                                    var ex = glyph.getAttribute('horiz-adv-x') || em;
+                                    src = '<dt id="' + unicode + '" class="glyph"><a href="#' + unicode + '" class="char" id="svg-' + unicode + '"></a></dt>';
+                                    src += '<dd class="char-code">' + unicode + '</dd>';
+                                    src += '<dd class="char-name">' + charname + '</dd>';
+                                    var g = document.createElement("dl");
+                                    g.innerHTML = src;
+                                    target.appendChild(g);
+                                    if (charsvg) {
+                                        document.getElementById('svg-' + unicode).appendChild(createSVG(charsvg, ex, em));
+                                    }
+                                }
+                            }
+                        };
+                    }());
+                    reader.readAsText(file);
+                }
+
+            }
+            return false;
+        };
+       }
+    </script>
 </head>
+
 <body>
-Drop all font files here to view all its characters
+    <h2>
+        Drop all font files here to view all its characters
+    </h2>
+
 </body>
+
 </html>
